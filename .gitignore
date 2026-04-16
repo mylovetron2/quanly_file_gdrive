@@ -1,0 +1,49 @@
+# Google Drive Manager - Ignore Files
+
+# Dependencies
+/vendor/
+composer.lock
+
+# Configuration
+/config/gdrive_token.json
+/config/*.local.php
+
+# Debug files (don't commit)
+debug-*.php
+test-*.php
+
+# Logs
+/logs/*.log
+/logs/**/*.log
+
+# Uploads (temporary)
+/uploads/**/*
+!/uploads/.gitkeep
+!/uploads/temp/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.tmp
+*~
+
+# PHP
+*.cache
+*.swp
