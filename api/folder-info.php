@@ -1,6 +1,7 @@
 <?php
 /**
- * API: Folder Delete
+ * API: Folder Info
+ * Get folder information by ID
  */
 
 define('APP_ROOT', dirname(__DIR__));
@@ -10,7 +11,6 @@ require_once APP_ROOT . '/includes/Auth.php';
 require_once APP_ROOT . '/includes/Permission.php';
 require_once APP_ROOT . '/includes/Helper.php';
 require_once APP_ROOT . '/includes/FolderManager.php';
-require_once APP_ROOT . '/includes/GoogleDriveAPI.php';
 
 header('Content-Type: application/json');
 
@@ -22,27 +22,34 @@ if (!$auth->isLoggedIn()) {
 
 $permission = new Permission();
 
-if (!$permission->can('folder.delete')) {
-    Helper::jsonResponse(['success' => false, 'message' => 'You do not have permission to delete folders'], 403);
+if (!$permission->can('folder.manage')) {
+    Helper::jsonResponse(['success' => false, 'message' => 'Permission denied'], 403);
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     Helper::jsonResponse(['success' => false, 'message' => 'Invalid request method'], 405);
 }
 
-if (!isset($_POST['folder_id']) || empty($_POST['folder_id'])) {
+$folderId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+if (!$folderId) {
     Helper::jsonResponse(['success' => false, 'message' => 'Folder ID required']);
 }
 
 try {
     $folderManager = new FolderManager();
-    $folderId = (int)$_POST['folder_id'];
+    $folder = $folderManager->getFolder($folderId);
     
-    $result = $folderManager->deleteFolder($folderId);
+    if (!$folder) {
+        Helper::jsonResponse(['success' => false, 'message' => 'Folder not found']);
+    }
     
-    Helper::jsonResponse($result, 200);
+    Helper::jsonResponse([
+        'success' => true,
+        'data' => $folder
+    ]);
     
 } catch (Exception $e) {
-    error_log("Folder delete API error: " . $e->getMessage());
-    Helper::jsonResponse(['success' => false, 'message' => 'Server error: ' . $e->getMessage()], 500);
+    error_log("Folder info API error: " . $e->getMessage());
+    Helper::jsonResponse(['success' => false, 'message' => 'Server error'], 500);
 }

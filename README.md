@@ -1,4 +1,4 @@
-# Google Drive File Manager
+# Quản lý file XSCTBDVL
 
 Hệ thống quản lý file upload lên Google Drive với phân quyền người dùng, được xây dựng bằng PHP thuần và MySQL.
 

@@ -4,6 +4,11 @@
  * Handles file operations with Google Drive
  */
 
+// Ensure Database class is loaded
+if (!class_exists('Database')) {
+    require_once __DIR__ . '/../config/database.php';
+}
+
 class FileManager {
     private $db;
     private $auth;

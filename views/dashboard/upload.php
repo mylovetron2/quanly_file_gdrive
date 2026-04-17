@@ -126,96 +126,96 @@ include APP_ROOT . '/views/includes/header.php';
 </div>
 
 <?php
-$extraJS = <<<'JS'
+$extraJS = '
 <script>
 $(document).ready(function() {
-    $('#uploadForm').on('submit', function(e) {
+    $("#uploadForm").on("submit", function(e) {
         e.preventDefault();
         
         var formData = new FormData(this);
-        var uploadBtn = $('#uploadBtn');
-        var progressDiv = $('#uploadProgress');
-        var progressBar = $('#progressBar');
-        var statusText = $('#uploadStatus');
+        var uploadBtn = $("#uploadBtn");
+        var progressDiv = $("#uploadProgress");
+        var progressBar = $("#progressBar");
+        var statusText = $("#uploadStatus");
         
         // Disable button
-        uploadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Đang upload...');
+        uploadBtn.prop("disabled", true).html("<i class=\"fas fa-spinner fa-spin me-2\"></i>Đang upload...");
         
         // Show progress
         progressDiv.show();
         
         $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
+            url: $(this).attr("action"),
+            type: "POST",
             data: formData,
             processData: false,
             contentType: false,
             xhr: function() {
                 var xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener('progress', function(e) {
+                xhr.upload.addEventListener("progress", function(e) {
                     if (e.lengthComputable) {
                         var percentComplete = Math.round((e.loaded / e.total) * 100);
-                        progressBar.css('width', percentComplete + '%').text(percentComplete + '%');
-                        statusText.text('Đã upload: ' + formatBytes(e.loaded) + ' / ' + formatBytes(e.total));
+                        progressBar.css("width", percentComplete + "%").text(percentComplete + "%");
+                        statusText.text("Đã upload: " + formatBytes(e.loaded) + " / " + formatBytes(e.total));
                     }
                 }, false);
                 return xhr;
             },
             success: function(response) {
                 if (response.success) {
-                    alert('✓ ' + response.message);
-                    window.location.href = '<?php echo APP_URL; ?>/views/dashboard/files.php<?php echo $folderId ? '?folder=' . $folderId : ''; ?>';
+                    alert("✓ " + response.message);
+                    window.location.href = "' . APP_URL . '/views/dashboard/files.php' . ($folderId ? '?folder=' . $folderId : '') . '";
                 } else {
-                    alert('✗ Lỗi: ' + response.message);
-                    uploadBtn.prop('disabled', false).html('<i class="fas fa-upload me-2"></i>Upload File');
+                    alert("✗ Lỗi: " + response.message);
+                    uploadBtn.prop("disabled", false).html("<i class=\"fas fa-upload me-2\"></i>Upload File");
                     progressDiv.hide();
                 }
             },
             error: function(xhr, status, error) {
-                alert('✗ Lỗi khi upload: ' + error);
-                uploadBtn.prop('disabled', false).html('<i class="fas fa-upload me-2"></i>Upload File');
+                alert("✗ Lỗi khi upload: " + error);
+                uploadBtn.prop("disabled", false).html("<i class=\"fas fa-upload me-2\"></i>Upload File");
                 progressDiv.hide();
             }
         });
     });
     
     // Show file info when selected
-    $('#fileInput').on('change', function() {
+    $("#fileInput").on("change", function() {
         var file = this.files[0];
         if (file) {
             var size = file.size;
-            var maxSize = <?php echo MAX_UPLOAD_SIZE; ?>;
+            var maxSize = ' . MAX_UPLOAD_SIZE . ';
             
             if (size > maxSize) {
-                alert('File quá lớn! Dung lượng tối đa: <?php echo Helper::formatFileSize(MAX_UPLOAD_SIZE); ?>');
-                $(this).val('');
+                alert("File quá lớn! Dung lượng tối đa: ' . Helper::formatFileSize(MAX_UPLOAD_SIZE) . '");
+                $(this).val("");
                 return;
             }
             
             var fileName = file.name;
-            var ext = fileName.split('.').pop().toLowerCase();
-            var allowedExts = '<?php echo ALLOWED_EXTENSIONS; ?>'.split(',');
+            var ext = fileName.split(".").pop().toLowerCase();
+            var allowedExts = "' . ALLOWED_EXTENSIONS . '".split(",");
             
             if (!allowedExts.includes(ext)) {
-                alert('Loại file không được phép! Chỉ chấp nhận: <?php echo strtoupper(ALLOWED_EXTENSIONS); ?>');
-                $(this).val('');
+                alert("Loại file không được phép! Chỉ chấp nhận: ' . strtoupper(ALLOWED_EXTENSIONS) . '");
+                $(this).val("");
                 return;
             }
             
-            console.log('File OK:', fileName, formatBytes(size));
+            console.log("File OK:", fileName, formatBytes(size));
         }
     });
     
     function formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return "0 Bytes";
         var k = 1024;
-        var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        var sizes = ["Bytes", "KB", "MB", "GB"];
         var i = Math.floor(Math.log(bytes) / Math.log(k));
-        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
     }
 });
 </script>
-JS;
+';
 
 include APP_ROOT . '/views/includes/footer.php';
 ?>

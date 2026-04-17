@@ -4,6 +4,11 @@
  * Handles folder operations with Google Drive
  */
 
+// Ensure Database class is loaded
+if (!class_exists('Database')) {
+    require_once __DIR__ . '/../config/database.php';
+}
+
 class FolderManager {
     private $db;
     private $auth;
@@ -262,7 +267,7 @@ class FolderManager {
             
             // Check permission
             if (!$this->permission->can('folder.manage')) {
-                return ['success' => false, 'message' => 'You do not have permission to manage folders'];
+                return ['success' => false, 'message' => 'Bạn không có quyền quản lý thư mục'];
             }
             
             $result = $this->db->update('folders', $data, ['id' => $folderId]);
@@ -271,14 +276,14 @@ class FolderManager {
                 $this->logActivity($userId, 'folder_updated', 'folder', $folderId,
                     "Updated folder information");
                 
-                return ['success' => true, 'message' => 'Folder updated successfully'];
+                return ['success' => true, 'message' => 'Cập nhật thư mục thành công'];
             }
             
-            return ['success' => false, 'message' => 'Failed to update folder'];
+            return ['success' => false, 'message' => 'Không thể cập nhật thư mục'];
             
         } catch (Exception $e) {
             error_log("Update folder error: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Error updating folder'];
+            return ['success' => false, 'message' => 'Lỗi khi cập nhật thư mục'];
         }
     }
     

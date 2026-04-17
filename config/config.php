@@ -1,7 +1,7 @@
 <?php
 /**
  * Main Configuration File
- * Google Drive Manager
+ * Quản lý file XSCTBDVL
  */
 
 // Prevent direct access
@@ -17,7 +17,7 @@ if (!file_exists($localConfigFile)) {
 $localConfig = require $localConfigFile;
 
 // Application Settings
-define('APP_NAME', 'Google Drive Manager');
+define('APP_NAME', 'Quản lý file XSCTBDVL');
 define('APP_VERSION', '1.0.0');
 define('APP_URL', 'https://diavatly.cloud/gdrive-manager'); // Production domain with HTTPS
 

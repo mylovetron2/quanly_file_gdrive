@@ -42,7 +42,7 @@ try {
     
     $result = $fileManager->uploadFile($_FILES['file'], $folderId, $description);
     
-    Helper::jsonResponse($result, $result['success'] ? 200 : 400);
+    Helper::jsonResponse($result, 200);
     
 } catch (Exception $e) {
     error_log("Upload API error: " . $e->getMessage());

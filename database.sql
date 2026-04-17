@@ -1,4 +1,4 @@
--- Google Drive Manager Database Schema
+-- Quản lý file XSCTBDVL Database Schema
 -- Created: 2026-04-16
 
 -- Drop database if exists

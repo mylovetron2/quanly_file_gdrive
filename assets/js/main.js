@@ -1,4 +1,4 @@
-// Main JavaScript for Google Drive Manager
+// Main JavaScript for Quản lý file XSCTBDVL
 
 $(document).ready(function() {
     // Auto-dismiss alerts after 5 seconds

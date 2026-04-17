@@ -1,4 +1,4 @@
-# 🚀 Hướng dẫn cài đặt nhanh
+# 🚀 Hướng dẫn cài đặt - Quản lý file XSCTBDVL
 
 ## 1. Yêu cầu
 

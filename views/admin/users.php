@@ -101,10 +101,6 @@ include APP_ROOT . '/views/includes/header.php';
                                     <td><?php echo $user['last_login'] ? Helper::timeAgo($user['last_login']) : '-'; ?></td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <button type="button" class="btn btn-outline-primary" 
-                                                    onclick="editUser(<?php echo $user['id']; ?>)" title="Sửa">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
                                             <button type="button" class="btn btn-outline-info" 
                                                     onclick="managePermissions(<?php echo $user['id']; ?>)" title="Phân quyền">
                                                 <i class="fas fa-key"></i>
@@ -178,47 +174,84 @@ include APP_ROOT . '/views/includes/header.php';
 </div>
 
 <?php
-$extraJS = <<<'JS'
+$extraJS = '
 <script>
-$('#createUserForm').on('submit', function(e) {
+$("#createUserForm").on("submit", function(e) {
     e.preventDefault();
     
-    $.post('<?php echo APP_URL; ?>/api/user-create.php', $(this).serialize(), function(response) {
-        if (response.success) {
-            alert('✓ ' + response.message);
-            location.reload();
-        } else {
-            alert('✗ Lỗi: ' + response.message);
+    var formData = $(this).serialize();
+    var submitBtn = $(this).find("button[type=submit]");
+    var originalBtnText = submitBtn.html();
+    
+    console.log("Form data:", formData);
+    
+    // Disable submit button
+    submitBtn.prop("disabled", true).html("<i class=\"fas fa-spinner fa-spin me-2\"></i>Đang tạo...");
+    
+    $.ajax({
+        url: "' . APP_URL . '/api/user-create.php",
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        success: function(response) {
+            console.log("Response:", response);
+            if (response.success) {
+                alert("✓ " + response.message);
+                $("#createUserModal").modal("hide");
+                location.reload();
+            } else {
+                alert("✗ Lỗi: " + response.message);
+                submitBtn.prop("disabled", false).html(originalBtnText);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX Error:", status, error);
+            console.error("Response Text:", xhr.responseText);
+            console.error("Status Code:", xhr.status);
+            
+            var errorMsg = "Lỗi kết nối server";
+            try {
+                var jsonResponse = JSON.parse(xhr.responseText);
+                if (jsonResponse.message) {
+                    errorMsg = jsonResponse.message;
+                }
+            } catch(e) {}
+            
+            alert("✗ " + errorMsg + "\\n\\nCheck Console (F12) for details");
+            submitBtn.prop("disabled", false).html(originalBtnText);
         }
-    }, 'json');
+    });
 });
 
-function editUser(userId) {
-    alert('Tính năng đang được phát triển');
-}
+// Reset form when modal is closed
+$("#createUserModal").on("hidden.bs.modal", function() {
+    $("#createUserForm")[0].reset();
+});
 
 function managePermissions(userId) {
-    window.location.href = '<?php echo APP_URL; ?>/views/admin/user-permissions.php?id=' + userId;
+    window.location.href = "' . APP_URL . '/views/admin/user-permissions.php?id=" + userId;
 }
 
 function deleteUser(userId) {
-    if (!confirm('Bạn có chắc muốn xóa người dùng này?')) {
+    if (!confirm("Bạn có chắc muốn xóa người dùng này?")) {
         return;
     }
     
-    $.post('<?php echo APP_URL; ?>/api/user-delete.php', {
+    $.post("' . APP_URL . '/api/user-delete.php", {
         user_id: userId
     }, function(response) {
         if (response.success) {
-            alert('✓ ' + response.message);
+            alert("✓ " + response.message);
             location.reload();
         } else {
-            alert('✗ Lỗi: ' + response.message);
+            alert("✗ Lỗi: " + response.message);
         }
-    }, 'json');
+    }, "json").fail(function() {
+        alert("✗ Lỗi kết nối server");
+    });
 }
 </script>
-JS;
+';
 
 include APP_ROOT . '/views/includes/footer.php';
 ?>

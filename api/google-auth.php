@@ -32,7 +32,7 @@ try {
         file_put_contents($tokenFile, json_encode($token));
         
         echo "<h2>✓ Authentication Successful!</h2>";
-        echo "<p>Token has been saved. You can now use the Google Drive Manager.</p>";
+        echo "<p>Token has been saved. You can now use the Quản lý file XSCTBDVL.</p>";
         echo "<p><a href='" . APP_URL . "'>Go to Application</a></p>";
         
     } else {

@@ -4,6 +4,11 @@
  * Handles user authentication, sessions, and login/logout
  */
 
+// Ensure Database class is loaded
+if (!class_exists('Database')) {
+    require_once __DIR__ . '/../config/database.php';
+}
+
 class Auth {
     private $db;
     private static $currentUser = null;

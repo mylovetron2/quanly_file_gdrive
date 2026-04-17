@@ -113,19 +113,29 @@ include APP_ROOT . '/views/includes/header.php';
                                     </small>
                                 </div>
                                 
-                                <?php if ($permission->can('folder.delete')): ?>
+                                <?php if ($permission->can('folder.delete') || $permission->can('folder.manage')): ?>
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-link text-muted" type="button" 
                                                 data-bs-toggle="dropdown">
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
-                                            <li>
-                                                <a class="dropdown-item text-danger" href="#"
-                                                   onclick="deleteFolder(<?php echo $folder['id']; ?>); return false;">
-                                                    <i class="fas fa-trash me-2"></i>Xóa
-                                                </a>
-                                            </li>
+                                            <?php if ($permission->can('folder.manage')): ?>
+                                                <li>
+                                                    <a class="dropdown-item" href="#"
+                                                       onclick="renameFolder(<?php echo $folder['id']; ?>, '<?php echo htmlspecialchars($folder['folder_name'], ENT_QUOTES); ?>'); return false;">
+                                                        <i class="fas fa-edit me-2"></i>Sửa tên
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
+                                            <?php if ($permission->can('folder.delete')): ?>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="#"
+                                                       onclick="deleteFolder(<?php echo $folder['id']; ?>); return false;">
+                                                        <i class="fas fa-trash me-2"></i>Xóa
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
                                         </ul>
                                     </div>
                                 <?php endif; ?>
@@ -252,48 +262,123 @@ include APP_ROOT . '/views/includes/header.php';
     </div>
 </div>
 
+<!-- Rename Folder Modal -->
+<div class="modal fade" id="renameFolderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Sửa tên thư mục</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="renameFolderForm">
+                <input type="hidden" id="renameFolderId" name="folder_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="renameFolderName" class="form-label">Tên thư mục mới</label>
+                        <input type="text" class="form-control" id="renameFolderName" name="folder_name" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php
-$extraJS = <<<'JS'
+$extraJS = '
 <script>
 function deleteFile(fileId) {
-    if (!confirm('Bạn có chắc muốn xóa file này?')) {
+    if (!confirm("Bạn có chắc muốn xóa file này?")) {
         return;
     }
     
-    $.post('<?php echo APP_URL; ?>/api/file-delete.php', {
+    $.post("' . APP_URL . '/api/file-delete.php", {
         file_id: fileId
     }, function(response) {
         if (response.success) {
             alert(response.message);
             location.reload();
         } else {
-            alert('Lỗi: ' + response.message);
+            alert("Lỗi: " + response.message);
         }
-    }, 'json');
+    }, "json");
 }
 
 function deleteFolder(folderId) {
-    if (!confirm('Bạn có chắc muốn xóa thư mục này?')) {
+    if (!confirm("Bạn có chắc muốn xóa thư mục này?")) {
         return;
     }
     
-    $.post('<?php echo APP_URL; ?>/api/folder-delete.php', {
+    $.post("' . APP_URL . '/api/folder-delete.php", {
         folder_id: folderId
     }, function(response) {
         if (response.success) {
             alert(response.message);
             location.reload();
         } else {
-            alert('Lỗi: ' + response.message);
+            alert("Lỗi: " + response.message);
         }
-    }, 'json');
+    }, "json");
 }
 
+function renameFolder(folderId, currentName) {
+    $("#renameFolderId").val(folderId);
+    $("#renameFolderName").val(currentName);
+    $("#renameFolderModal").modal("show");
+}
+
+$("#renameFolderForm").on("submit", function(e) {
+    e.preventDefault();
+    
+    var formData = $(this).serialize();
+    var submitBtn = $(this).find("button[type=submit]");
+    var originalBtnText = submitBtn.html();
+    
+    submitBtn.prop("disabled", true).html("<i class=\"fas fa-spinner fa-spin me-2\"></i>Đang lưu...");
+    
+    $.ajax({
+        url: "' . APP_URL . '/api/folder-update.php",
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                alert("✓ " + response.message);
+                $("#renameFolderModal").modal("hide");
+                location.reload();
+            } else {
+                alert("✗ Lỗi: " + response.message);
+                submitBtn.prop("disabled", false).html(originalBtnText);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX Error:", status, error);
+            console.error("Response Text:", xhr.responseText);
+            
+            var errorMsg = "Lỗi kết nối server";
+            try {
+                var jsonResponse = JSON.parse(xhr.responseText);
+                if (jsonResponse.message) {
+                    errorMsg = jsonResponse.message;
+                }
+            } catch(e) {}
+            
+            alert("✗ " + errorMsg);
+            submitBtn.prop("disabled", false).html(originalBtnText);
+        }
+    });
+});
+
 function shareFile(fileId) {
-    alert('Tính năng chia sẻ file đang được phát triển');
+    alert("Tính năng chia sẻ file đang được phát triển");
 }
 </script>
-JS;
+';
 
 include APP_ROOT . '/views/includes/footer.php';
 ?>

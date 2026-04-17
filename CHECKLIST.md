@@ -1,4 +1,4 @@
-# ✅ Checklist Setup - Google Drive Manager
+# ✅ Checklist Setup - Quản lý file XSCTBDVL
 
 Sau khi tải project về, làm theo các bước sau:
 
@@ -102,7 +102,7 @@ define('ENCRYPTION_KEY', 'abc123xyz789...'); // 32 ký tự ngẫu nhiên
 - [ ] Menu > APIs & Services > Credentials
 - [ ] Click "Create Credentials" > "OAuth client ID"
 - [ ] Chọn "Web application"
-- [ ] Application name: "Google Drive Manager"
+- [x] Application name: "Quản lý file XSCTBDVL"
 - [ ] Authorized redirect URIs:
   ```
   http://localhost/gdrive-manager/api/google-callback.php

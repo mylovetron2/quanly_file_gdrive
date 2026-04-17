@@ -40,7 +40,7 @@ try {
     
     $result = $fileManager->deleteFile($fileId);
     
-    Helper::jsonResponse($result, $result['success'] ? 200 : 400);
+    Helper::jsonResponse($result, 200);
     
 } catch (Exception $e) {
     error_log("Delete API error: " . $e->getMessage());

@@ -4,6 +4,11 @@
  * Handles all Google Drive operations using Google API PHP Client
  */
 
+// Ensure Database class is loaded
+if (!class_exists('Database')) {
+    require_once __DIR__ . '/../config/database.php';
+}
+
 class GoogleDriveAPI {
     private $client;
     private $service;
