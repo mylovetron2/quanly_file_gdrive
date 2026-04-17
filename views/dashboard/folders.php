@@ -26,8 +26,7 @@ $folderManager = new FolderManager();
 $folderTree = $folderManager->getFolderTree();
 
 $title = 'Quản lý thư mục';
-$showNav = true;
-$showFooter = true;
+$showNav = true;$showSidebar = true;$showFooter = true;
 
 include APP_ROOT . '/views/includes/header.php';
 ?>

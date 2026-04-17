@@ -121,6 +121,4 @@ rm config/gdrive_token.json
 
 Xem chi tiết trong [README.md](README.md)
 
----
 
-**Chúc bạn sử dụng thành công!** 🎉

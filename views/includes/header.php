@@ -23,7 +23,15 @@
         <?php include APP_ROOT . '/views/includes/navbar.php'; ?>
     <?php endif; ?>
     
-    <div class="<?php echo isset($containerFluid) && $containerFluid ? 'container-fluid' : 'container'; ?> mt-4">
+    <?php 
+    // Include sidebar for dashboard pages
+    $showSidebar = isset($showSidebar) ? $showSidebar : false;
+    if ($showSidebar && isset($showNav) && $showNav): 
+        include APP_ROOT . '/views/includes/sidebar.php';
+    endif;
+    ?>
+    
+    <div class="<?php echo $showSidebar ? 'main-content-with-sidebar' : ''; ?> <?php echo isset($containerFluid) && $containerFluid ? 'container-fluid' : 'container'; ?> mt-4">
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>

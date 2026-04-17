@@ -28,6 +28,7 @@ $allFolders = $folderManager->getFolderTree();
 
 $title = 'Upload File';
 $showNav = true;
+$showSidebar = true;
 $showFooter = true;
 
 include APP_ROOT . '/views/includes/header.php';
