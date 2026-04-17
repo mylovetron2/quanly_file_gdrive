@@ -30,7 +30,11 @@ class GoogleDriveAPI {
             $this->client->setClientId(GDRIVE_CLIENT_ID);
             $this->client->setClientSecret(GDRIVE_CLIENT_SECRET);
             $this->client->setRedirectUri(GDRIVE_REDIRECT_URI);
-            $this->client->setScopes([GDRIVE_SCOPE]);
+            
+            // Support multiple scopes (space-separated)
+            $scopes = explode(' ', GDRIVE_SCOPE);
+            $this->client->setScopes($scopes);
+            
             $this->client->setAccessType(GDRIVE_ACCESS_TYPE);
             $this->client->setPrompt('consent');
             
@@ -391,5 +395,70 @@ class GoogleDriveAPI {
             error_log("Google Drive make public error: " . $e->getMessage());
             return ['success' => false, 'error' => $e->getMessage()];
         }
+    }
+    
+    /**
+     * Get Drive storage quota information
+     * Returns storage limit, usage, and available space
+     */
+    public function getStorageQuota() {
+        try {
+            if (!$this->isAuthenticated()) {
+                return [
+                    'success' => false,
+                    'error' => 'Chưa xác thực với Google Drive'
+                ];
+            }
+            
+            // Get storage quota information
+            $about = $this->service->about->get(['fields' => 'storageQuota,user']);
+            $storageQuota = $about->getStorageQuota();
+            $user = $about->getUser();
+            
+            $limit = $storageQuota->getLimit();
+            $usage = $storageQuota->getUsage();
+            $usageInDrive = $storageQuota->getUsageInDrive();
+            $usageInDriveTrash = $storageQuota->getUsageInDriveTrash();
+            
+            // Calculate percentages and format
+            $usedPercent = $limit > 0 ? round(($usage / $limit) * 100, 2) : 0;
+            $availableSpace = $limit - $usage;
+            
+            return [
+                'success' => true,
+                'limit' => $limit,
+                'limit_formatted' => $this->formatBytes($limit),
+                'usage' => $usage,
+                'usage_formatted' => $this->formatBytes($usage),
+                'usage_in_drive' => $usageInDrive,
+                'usage_in_drive_formatted' => $this->formatBytes($usageInDrive),
+                'usage_in_trash' => $usageInDriveTrash,
+                'usage_in_trash_formatted' => $this->formatBytes($usageInDriveTrash),
+                'available' => $availableSpace,
+                'available_formatted' => $this->formatBytes($availableSpace),
+                'used_percent' => $usedPercent,
+                'user_email' => $user->getEmailAddress(),
+                'user_name' => $user->getDisplayName()
+            ];
+            
+        } catch (Exception $e) {
+            error_log("Google Drive storage quota error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => 'Không thể lấy thông tin dung lượng: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Format bytes to human readable format
+     */
+    private function formatBytes($bytes, $precision = 2) {
+        if ($bytes == 0) return '0 B';
+        
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        $base = log($bytes, 1024);
+        
+        return round(pow(1024, $base - floor($base)), $precision) . ' ' . $units[floor($base)];
     }
 }

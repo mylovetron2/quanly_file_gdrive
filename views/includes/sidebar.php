@@ -241,10 +241,33 @@ function renderSidebarFolderTree($folders, $level = 0) {
     top: 70px;
     z-index: 999;
     display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: scale(0.8);
 }
 
-.sidebar.collapsed + .sidebar-toggle-btn {
+.sidebar-toggle-btn.show {
     display: block;
+    opacity: 1;
+    transform: scale(1);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-20px) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.sidebar-toggle-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 /* Responsive */
@@ -259,6 +282,10 @@ function renderSidebarFolderTree($folders, $level = 0) {
     
     .main-content-with-sidebar {
         margin-left: 10px;
+    }
+    
+    .sidebar-toggle-btn.show {
+        display: block !important;
     }
 }
 </style>
@@ -283,10 +310,29 @@ function toggleFolder(element) {
 function toggleSidebar() {
     const sidebar = document.getElementById('folderSidebar');
     const mainContent = document.querySelector('.main-content-with-sidebar');
+    const toggleBtn = document.querySelector('.sidebar-toggle-btn');
+    const toggleIcon = toggleBtn ? toggleBtn.querySelector('i') : null;
     
     sidebar.classList.toggle('collapsed');
     if (mainContent) {
         mainContent.classList.toggle('sidebar-collapsed');
+    }
+    
+    // Toggle button visibility, icon, and tooltip
+    if (toggleBtn) {
+        if (sidebar.classList.contains('collapsed')) {
+            toggleBtn.classList.add('show');
+            toggleBtn.setAttribute('title', 'Mở menu thư mục');
+            if (toggleIcon) {
+                toggleIcon.className = 'fas fa-chevron-right';
+            }
+        } else {
+            toggleBtn.classList.remove('show');
+            toggleBtn.setAttribute('title', 'Thu gọn menu');
+            if (toggleIcon) {
+                toggleIcon.className = 'fas fa-chevron-left';
+            }
+        }
     }
     
     // Save state to localStorage
@@ -297,13 +343,17 @@ function toggleSidebar() {
 // Restore sidebar state on page load
 document.addEventListener('DOMContentLoaded', function() {
     const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    const sidebar = document.getElementById('folderSidebar');
+    const mainContent = document.querySelector('.main-content-with-sidebar');
+    const toggleBtn = document.querySelector('.sidebar-toggle-btn');
+    
     if (isCollapsed) {
-        const sidebar = document.getElementById('folderSidebar');
-        const mainContent = document.querySelector('.main-content-with-sidebar');
-        
         sidebar.classList.add('collapsed');
         if (mainContent) {
             mainContent.classList.add('sidebar-collapsed');
+        }
+        if (toggleBtn) {
+            toggleBtn.classList.add('show');
         }
     }
     
@@ -327,6 +377,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!-- Toggle button for collapsed sidebar -->
-<button class="btn btn-primary sidebar-toggle-btn" onclick="toggleSidebar()">
+<button class="btn btn-primary sidebar-toggle-btn" onclick="toggleSidebar()" title="Mở menu thư mục">
     <i class="fas fa-chevron-right"></i>
 </button>

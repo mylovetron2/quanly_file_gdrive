@@ -52,7 +52,7 @@ define('UPLOAD_CHUNK_SIZE', 5242880); // 5MB chunks for large files
 define('GDRIVE_CLIENT_ID', $localConfig['GOOGLE_CLIENT_ID']);
 define('GDRIVE_CLIENT_SECRET', $localConfig['GOOGLE_CLIENT_SECRET']);
 define('GDRIVE_REDIRECT_URI', APP_URL . '/api/google-callback.php');
-define('GDRIVE_SCOPE', 'https://www.googleapis.com/auth/drive.file');
+define('GDRIVE_SCOPE', 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly');
 define('GDRIVE_ACCESS_TYPE', 'offline');
 define('GDRIVE_ROOT_FOLDER_ID', ''); // Leave empty to use root or specify folder ID
 

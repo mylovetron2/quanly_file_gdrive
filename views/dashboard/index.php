@@ -158,6 +158,28 @@ include APP_ROOT . '/views/includes/header.php';
     </div>
 </div>
 
+<!-- Google Drive Storage Quota -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fab fa-google-drive me-2 text-primary"></i>Dung lượng Google Drive</h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshStorageQuota()">
+                    <i class="fas fa-refresh me-1"></i>Làm mới
+                </button>
+            </div>
+            <div class="card-body" id="storageQuotaContainer">
+                <div class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <p class="text-muted mt-2">Đang tải thông tin dung lượng...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <!-- Recent Files -->
     <div class="col-md-7 mb-4">
@@ -258,5 +280,163 @@ include APP_ROOT . '/views/includes/header.php';
         </div>
     </div>
 </div>
+
+<script>
+// Load Google Drive Storage Quota on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadStorageQuota();
+});
+
+function loadStorageQuota() {
+    const container = document.getElementById('storageQuotaContainer');
+    
+    fetch('<?php echo APP_URL; ?>/api/drive-storage.php')
+        .then(response => {
+            // Check if response is OK
+            if (!response.ok) {
+                throw new Error('HTTP error ' + response.status);
+            }
+            return response.text();
+        })
+        .then(text => {
+            // Log raw response for debugging
+            console.log('Storage API Response:', text);
+            
+            // Try to parse JSON
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                console.error('Response text:', text);
+                throw new Error('Invalid JSON response');
+            }
+            
+            if (data.success && data.data && data.data.success) {
+                displayStorageQuota(data.data);
+            } else {
+                // Show warning for not authenticated or other errors
+                const isNotAuthenticated = data.data && data.data.authenticated === false;
+                const errorMsg = data.message || 'Không thể tải thông tin dung lượng';
+                const needsScope = errorMsg.includes('insufficient') || errorMsg.includes('scope') || errorMsg.includes('permission');
+                
+                container.innerHTML = `
+                    <div class="alert alert-${isNotAuthenticated ? 'info' : 'warning'} mb-0">
+                        <i class="fas fa-${isNotAuthenticated ? 'info-circle' : 'exclamation-triangle'} me-2"></i>
+                        <strong>${errorMsg}</strong>
+                        ${isNotAuthenticated || needsScope ? '<br><small class="mt-2 d-block">Vui lòng <a href="' + '<?php echo APP_URL; ?>' + '/views/dashboard/reauthorize-drive.php" class="alert-link">kết nối lại Google Drive</a> để xem thông tin dung lượng.</small>' : ''}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Storage quota error:', error);
+            container.innerHTML = `
+                <div class="alert alert-danger mb-0">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <strong>Lỗi kết nối server</strong>
+                    <br><small>Chi tiết: ${error.message}</small>
+                    <br><small class="mt-1 d-block">Vui lòng kiểm tra console để xem lỗi chi tiết.</small>
+                </div>
+            `;
+        });
+}
+
+function displayStorageQuota(data) {
+    const container = document.getElementById('storageQuotaContainer');
+    
+    const progressBarColor = data.used_percent > 90 ? 'bg-danger' : 
+                             data.used_percent > 75 ? 'bg-warning' : 'bg-success';
+    
+    container.innerHTML = `
+        <div class="row">
+            <div class="col-md-8">
+                <h6 class="mb-3">
+                    <i class="fas fa-user-circle me-2"></i>${data.user_name || data.user_email}
+                </h6>
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Đã sử dụng</span>
+                        <span class="fw-bold">${data.usage_formatted} / ${data.limit_formatted}</span>
+                    </div>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar ${progressBarColor}" role="progressbar" 
+                             style="width: ${data.used_percent}%;" 
+                             aria-valuenow="${data.used_percent}" aria-valuemin="0" aria-valuemax="100">
+                            ${data.used_percent}%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-hdd fa-2x text-primary mb-2"></i>
+                            <h6 class="mb-0">${data.usage_in_drive_formatted}</h6>
+                            <small class="text-muted">Trong Drive</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-trash fa-2x text-warning mb-2"></i>
+                            <h6 class="mb-0">${data.usage_in_trash_formatted}</h6>
+                            <small class="text-muted">Thùng rác</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h6 class="mb-0">${data.available_formatted}</h6>
+                            <small class="text-muted">Còn trống</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card bg-light h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Thông tin
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-database text-primary me-2"></i>
+                                <strong>Tổng:</strong> ${data.limit_formatted}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-chart-pie text-success me-2"></i>
+                                <strong>Đã dùng:</strong> ${data.usage_formatted}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-percentage text-info me-2"></i>
+                                <strong>Tỷ lệ:</strong> ${data.used_percent}%
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-envelope text-secondary me-2"></i>
+                                <small>${data.user_email}</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function refreshStorageQuota() {
+    const container = document.getElementById('storageQuotaContainer');
+    container.innerHTML = `
+        <div class="text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="text-muted mt-2">Đang làm mới thông tin...</p>
+        </div>
+    `;
+    loadStorageQuota();
+}
+</script>
 
 <?php include APP_ROOT . '/views/includes/footer.php'; ?>
