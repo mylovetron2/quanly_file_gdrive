@@ -6,6 +6,26 @@
 
 define('APP_ROOT', dirname(__DIR__));
 require_once APP_ROOT . '/config/config.php';
+require_once APP_ROOT . '/includes/Helper.php';
+
+// Handle delete token request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'delete_token') {
+    header('Content-Type: application/json');
+    
+    try {
+        $tokenFile = APP_ROOT . '/config/gdrive_token.json';
+        
+        if (file_exists($tokenFile)) {
+            unlink($tokenFile);
+            Helper::jsonResponse(['success' => true, 'message' => 'Token deleted successfully']);
+        } else {
+            Helper::jsonResponse(['success' => false, 'message' => 'Token file not found']);
+        }
+    } catch (Exception $e) {
+        Helper::jsonResponse(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+    exit;
+}
 
 try {
     require_once APP_ROOT . '/vendor/autoload.php';

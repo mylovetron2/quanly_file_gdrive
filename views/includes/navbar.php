@@ -42,6 +42,7 @@
                         <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/admin/roles.php">Quản lý vai trò</a></li>
                         <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/admin/permissions.php">Phân quyền</a></li>
                         <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/admin/drive-account.php"><i class="fab fa-google-drive text-primary"></i> Google Drive Account</a></li>
                         <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/admin/logs.php">Lịch sử hoạt động</a></li>
                     </ul>
                 </li>
