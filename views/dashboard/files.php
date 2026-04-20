@@ -124,7 +124,7 @@ include APP_ROOT . '/views/includes/header.php';
                                             <?php if ($permission->can('folder.manage')): ?>
                                                 <li>
                                                     <a class="dropdown-item" href="#"
-                                                       onclick="renameFolder(<?php echo $folder['id']; ?>, '<?php echo htmlspecialchars($folder['folder_name'], ENT_QUOTES); ?>'); return false;">
+                                                       onclick='renameFolder(<?php echo $folder["id"]; ?>, <?php echo json_encode($folder["folder_name"]); ?>); return false;'>
                                                         <i class="fas fa-edit me-2"></i>Sửa tên
                                                     </a>
                                                 </li>
@@ -176,6 +176,7 @@ include APP_ROOT . '/views/includes/header.php';
                             <thead>
                                 <tr>
                                     <th>Tên file</th>
+                                    <th>Mô tả</th>
                                     <th>Kích thước</th>
                                     <th>Loại</th>
                                     <th>Ngày tải lên</th>
@@ -191,6 +192,9 @@ include APP_ROOT . '/views/includes/header.php';
                                             <i class="fas <?php echo Helper::getFileIcon($file['file_extension']); ?> me-2"></i>
                                             <strong><?php echo htmlspecialchars($file['file_name']); ?></strong>
                                         </td>
+                                        <td>
+                                            <span class="text-muted" style="font-size: 11px;"><?php echo htmlspecialchars($file['description'] ?? '-'); ?></span>
+                                        </td>
                                         <td><?php echo Helper::formatFileSize($file['file_size']); ?></td>
                                         <td><span class="badge bg-secondary"><?php echo strtoupper($file['file_extension']); ?></span></td>
                                         <td><?php echo Helper::formatDate($file['uploaded_at']); ?></td>
@@ -198,11 +202,33 @@ include APP_ROOT . '/views/includes/header.php';
                                         <td><?php echo number_format($file['download_count']); ?></td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
+                                                <?php 
+                                                // Các file có thể xem trực tiếp
+                                                $viewableExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'jpg', 'jpeg', 'png', 'gif', 'bmp'];
+                                                $canView = in_array(strtolower($file['file_extension']), $viewableExtensions);
+                                                ?>
+                                                
+                                                <?php if ($permission->can('file.view') && $canView): ?>
+                                                    <button type="button" class="btn btn-outline-success" 
+                                                            onclick='viewFile(<?php echo $file["id"]; ?>, <?php echo json_encode($file["file_name"]); ?>, <?php echo json_encode($file["gdrive_web_link"] ?? ""); ?>)' 
+                                                            title="Xem file">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                                
                                                 <?php if ($permission->can('file.download')): ?>
                                                     <a href="<?php echo APP_URL; ?>/api/file-download.php?id=<?php echo $file['id']; ?>" 
                                                        class="btn btn-outline-primary" title="Tải xuống">
                                                         <i class="fas fa-download"></i>
                                                     </a>
+                                                <?php endif; ?>
+                                                
+                                                <?php if ($permission->can('file.upload')): ?>
+                                                    <button type="button" class="btn btn-outline-secondary" 
+                                                            onclick='editDescription(<?php echo $file["id"]; ?>, <?php echo json_encode($file["description"] ?? ""); ?>)' 
+                                                            title="Sửa mô tả">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
                                                 <?php endif; ?>
                                                 
                                                 <?php if ($permission->can('file.share')): ?>
@@ -290,6 +316,56 @@ include APP_ROOT . '/views/includes/header.php';
     </div>
 </div>
 
+<!-- Edit File Description Modal -->
+<div class="modal fade" id="editDescriptionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Sửa mô tả file</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editDescriptionForm">
+                <input type="hidden" id="editFileId" name="file_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editFileDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="editFileDescription" name="description" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View File Modal -->
+<div class="modal fade" id="viewFileModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-eye me-2"></i><span id="viewFileName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="fileViewerContainer" style="height: 75vh; width: 100%;">
+                    <iframe id="fileViewerFrame" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="viewFileOpenNew" target="_blank" class="btn btn-outline-primary">
+                    <i class="fas fa-external-link-alt me-2"></i>Mở tab mới
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php
 $extraJS = '
 <script>
@@ -330,7 +406,9 @@ function deleteFolder(folderId) {
 function renameFolder(folderId, currentName) {
     $("#renameFolderId").val(folderId);
     $("#renameFolderName").val(currentName);
-    $("#renameFolderModal").modal("show");
+    
+    var renameModal = new bootstrap.Modal(document.getElementById("renameFolderModal"));
+    renameModal.show();
 }
 
 $("#renameFolderForm").on("submit", function(e) {
@@ -350,7 +428,7 @@ $("#renameFolderForm").on("submit", function(e) {
         success: function(response) {
             if (response.success) {
                 alert("✓ " + response.message);
-                $("#renameFolderModal").modal("hide");
+                bootstrap.Modal.getInstance(document.getElementById("renameFolderModal")).hide();
                 location.reload();
             } else {
                 alert("✗ Lỗi: " + response.message);
@@ -378,6 +456,95 @@ $("#renameFolderForm").on("submit", function(e) {
 function shareFile(fileId) {
     alert("Tính năng chia sẻ file đang được phát triển");
 }
+
+function editDescription(fileId, currentDescription) {
+    $("#editFileId").val(fileId);
+    $("#editFileDescription").val(currentDescription);
+    
+    var editModal = new bootstrap.Modal(document.getElementById("editDescriptionModal"));
+    editModal.show();
+}
+
+function viewFile(fileId, fileName, webLink) {
+    console.log("viewFile called:", fileId, fileName, webLink);
+    $("#viewFileName").text(fileName);
+    
+    if (webLink && webLink !== "") {
+        console.log("Using existing link:", webLink);
+        displayFileViewer(webLink);
+    } else {
+        console.log("Fetching link from API...");
+        $.get("' . APP_URL . '/api/file-view.php", {id: fileId}, function(response) {
+            console.log("API response:", response);
+            if (response.success) {
+                displayFileViewer(response.web_link);
+            } else {
+                alert("Lỗi: " + response.message);
+            }
+        }, "json").fail(function(xhr, status, error) {
+            console.error("API error:", status, error);
+            alert("Không thể lấy link xem file");
+        });
+    }
+}
+
+function displayFileViewer(webLink) {
+    console.log("displayFileViewer:", webLink);
+    var viewerUrl = webLink;
+    
+    if (!webLink.includes("/view") && !webLink.includes("/preview")) {
+        viewerUrl = "https://docs.google.com/viewer?url=" + encodeURIComponent(webLink) + "&embedded=true";
+    }
+    
+    console.log("Viewer URL:", viewerUrl);
+    $("#fileViewerFrame").attr("src", viewerUrl);
+    $("#viewFileOpenNew").attr("href", webLink);
+    
+    var viewModal = new bootstrap.Modal(document.getElementById("viewFileModal"));
+    viewModal.show();
+}
+
+$("#editDescriptionForm").on("submit", function(e) {
+    e.preventDefault();
+    
+    var formData = $(this).serialize();
+    var submitBtn = $(this).find("button[type=submit]");
+    var originalBtnText = submitBtn.html();
+    
+    submitBtn.prop("disabled", true).html("<i class=\"fas fa-spinner fa-spin me-2\"></i>Đang lưu...");
+    
+    $.ajax({
+        url: "' . APP_URL . '/api/file-update.php",
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                alert("✓ " + response.message);
+                bootstrap.Modal.getInstance(document.getElementById("editDescriptionModal")).hide();
+                location.reload();
+            } else {
+                alert("✗ Lỗi: " + response.message);
+                submitBtn.prop("disabled", false).html(originalBtnText);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX Error:", status, error);
+            console.error("Response Text:", xhr.responseText);
+            
+            var errorMsg = "Lỗi kết nối server";
+            try {
+                var jsonResponse = JSON.parse(xhr.responseText);
+                if (jsonResponse.message) {
+                    errorMsg = jsonResponse.message;
+                }
+            } catch(e) {}
+            
+            alert("✗ " + errorMsg);
+            submitBtn.prop("disabled", false).html(originalBtnText);
+        }
+    });
+});
 </script>
 ';
 
