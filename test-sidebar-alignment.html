@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sidebar Alignment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+        body { padding-top: 56px; background: #f8f9fa; }
+        .test-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1100;
+        }
+        .info-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #28a745;
+        }
+        .alignment-guide {
+            position: absolute;
+            left: 45px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(255, 0, 0, 0.2);
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-primary test-navbar">
+        <div class="container-fluid">
+            <span class="navbar-brand">📐 Test Căn Chỉnh Sidebar</span>
+        </div>
+    </nav>
+
+    <!-- Sidebar with alignment guide -->
+    <div class="sidebar" id="folderSidebar" style="position: relative;">
+        <!-- Vertical alignment guide (red line) -->
+        <div class="alignment-guide"></div>
+        
+        <div class="sidebar-header">
+            <h6 class="mb-0"><i class="fas fa-folder-tree me-2"></i>Thư mục</h6>
+        </div>
+        
+        <div class="sidebar-body">
+            <ul class="sidebar-folder-list">
+                <!-- Root item (All files) -->
+                <li class="sidebar-folder-item">
+                    <span class="folder-spacer"></span>
+                    <a href="#" class="folder-link">
+                        <i class="fas fa-home text-primary me-1"></i>
+                        <span class="folder-name">Tất cả files</span>
+                    </a>
+                </li>
+                
+                <!-- Level 0 - Folder WITH children (has toggle) -->
+                <li class="sidebar-folder-item active">
+                    <a href="#" class="folder-toggle expanded" data-folder-id="1" onclick="toggleFolder(this); return false;">
+                        <i class="fas fa-chevron-right toggle-icon"></i>
+                    </a>
+                    <a href="#" class="folder-link">
+                        <i class="fas fa-folder text-warning me-1"></i>
+                        <span class="folder-name">Biên bản chuẩn máy - RDNGA</span>
+                        <span class="badge bg-secondary rounded-pill">5</span>
+                    </a>
+                </li>
+                
+                <!-- Level 1 - Child folder (indented) -->
+                <ul class="sidebar-folder-children" data-parent-id="1" style="display: block;">
+                    <li class="sidebar-folder-item">
+                        <span class="folder-spacer"></span>
+                        <a href="#" class="folder-link">
+                            <i class="fas fa-folder text-warning me-1"></i>
+                            <span class="folder-name">Biểu mẫu-Qui trình</span>
+                            <span class="badge bg-secondary rounded-pill">1</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Level 0 - Folder WITHOUT children (has spacer) -->
+                <li class="sidebar-folder-item">
+                    <span class="folder-spacer"></span>
+                    <a href="#" class="folder-link">
+                        <i class="fas fa-folder text-warning me-1"></i>
+                        <span class="folder-name">Kiểm định-Báo đường định kỳ 2026</span>
+                        <span class="badge bg-secondary rounded-pill">5</span>
+                    </a>
+                </li>
+                
+                <!-- Level 0 - Another folder WITHOUT children -->
+                <li class="sidebar-folder-item">
+                    <span class="folder-spacer"></span>
+                    <a href="#" class="folder-link">
+                        <i class="fas fa-folder text-warning me-1"></i>
+                        <span class="folder-name">Tài liệu máy CNM</span>
+                    </a>
+                </li>
+                
+                <!-- Level 0 - Folder WITH children (collapsed) -->
+                <li class="sidebar-folder-item">
+                    <a href="#" class="folder-toggle" data-folder-id="2" onclick="toggleFolder(this); return false;">
+                        <i class="fas fa-chevron-right toggle-icon"></i>
+                    </a>
+                    <a href="#" class="folder-link">
+                        <i class="fas fa-folder text-warning me-1"></i>
+                        <span class="folder-name">Tài liệu máy Nga</span>
+                    </a>
+                </li>
+                
+                <!-- Level 1 - Child (hidden) -->
+                <ul class="sidebar-folder-children" data-parent-id="2" style="display: none;">
+                    <li class="sidebar-folder-item">
+                        <span class="folder-spacer"></span>
+                        <a href="#" class="folder-link">
+                            <i class="fas fa-folder text-warning me-1"></i>
+                            <span class="folder-name">Sub folder</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Level 0 - Another root folder -->
+                <li class="sidebar-folder-item">
+                    <span class="folder-spacer"></span>
+                    <a href="#" class="folder-link">
+                        <i class="fas fa-folder text-warning me-1"></i>
+                        <span class="folder-name">7 thư mục</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-footer">
+            <small class="text-muted"><i class="fas fa-folder me-1"></i>7 thư mục</small>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content-with-sidebar">
+        <div class="info-box">
+            <h5><i class="fas fa-check-circle text-success"></i> Đã sửa lỗi căn chỉnh!</h5>
+            <p class="mb-2"><strong>Vấn đề đã khắc phục:</strong></p>
+            <ul class="mb-2">
+                <li>✅ <strong>Border-left của active item:</strong> Thêm <code>padding-left: calc(0.75rem - 3px)</code> để bù lại 3px border</li>
+                <li>✅ <strong>Folder-toggle vs folder-spacer:</strong> Cả hai đều dùng <code>display: inline-flex</code> và có cùng size (20px × 20px)</li>
+                <li>✅ <strong>Flex-shrink:</strong> Thêm <code>flex-shrink: 0</code> để toggle/spacer không bị co lại</li>
+                <li>✅ <strong>Min-width cho text-truncate:</strong> Thêm <code>min-width: 0</code> để ellipsis hoạt động đúng trong flex</li>
+            </ul>
+            
+            <p class="mb-2"><strong>Hướng dẫn kiểm tra:</strong></p>
+            <ul class="mb-0">
+                <li>🔴 <strong>Đường dẫn đỏ:</strong> Tất cả folder icon cùng cấp phải thẳng hàng với đường này</li>
+                <li>📂 <strong>Folder có children:</strong> Có icon mũi tên <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i></li>
+                <li>📁 <strong>Folder không có children:</strong> Có khoảng trống 20px (giống toggle)</li>
+                <li>📂 <strong>Active folder:</strong> Background xanh nhạt + border trái xanh</li>
+            </ul>
+        </div>
+
+        <h2>✨ Kết quả:</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <strong>✅ Trước khi sửa</strong>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>❌ Folder có toggle và không có toggle không thẳng hàng</li>
+                            <li>❌ Active item bị lệch do border-left</li>
+                            <li>❌ Spacer dùng inline-block</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <strong>✅ Sau khi sửa</strong>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>✅ Tất cả folder cùng cấp thẳng hàng hoàn hảo</li>
+                            <li>✅ Active item không bị lệch</li>
+                            <li>✅ Spacer dùng inline-flex giống toggle</li>
+                            <li>✅ Folder children có indent đúng</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function toggleFolder(element) {
+        const icon = element.querySelector('.toggle-icon');
+        const folderId = element.getAttribute('data-folder-id');
+        const childrenList = document.querySelector('.sidebar-folder-children[data-parent-id="' + folderId + '"]');
+        
+        if (childrenList) {
+            if (childrenList.style.display === 'none') {
+                childrenList.style.display = 'block';
+                icon.classList.add('rotated');
+                element.classList.add('expanded');
+            } else {
+                childrenList.style.display = 'none';
+                icon.classList.remove('rotated');
+                element.classList.remove('expanded');
+            }
+        }
+    }
+    </script>
+</body>
+</html>

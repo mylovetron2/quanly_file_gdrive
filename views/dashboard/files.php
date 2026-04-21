@@ -71,17 +71,17 @@ include APP_ROOT . '/views/includes/header.php';
 
 <!-- Action Buttons -->
 <div class="row mb-3">
-    <div class="col-md-12">
-        <div class="btn-group" role="group">
+    <div class="col-12">
+        <div class="btn-group flex-wrap" role="group">
             <?php if ($permission->can('file.upload')): ?>
                 <a href="<?php echo APP_URL; ?>/views/dashboard/upload.php?folder=<?php echo $folderId ?? ''; ?>" 
-                   class="btn btn-primary">
+                   class="btn btn-primary mb-2 mb-md-0">
                     <i class="fas fa-upload me-2"></i>Upload File
                 </a>
             <?php endif; ?>
             
             <?php if ($permission->can('folder.create')): ?>
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createFolderModal">
+                <button type="button" class="btn btn-success mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#createFolderModal">
                     <i class="fas fa-folder-plus me-2"></i>Tạo Thư mục
                 </button>
             <?php endif; ?>
@@ -176,30 +176,30 @@ include APP_ROOT . '/views/includes/header.php';
                             <thead>
                                 <tr>
                                     <th>Tên file</th>
-                                    <th>Mô tả</th>
-                                    <th>Kích thước</th>
+                                    <th class="d-none d-md-table-cell">Mô tả</th>
+                                    <th class="d-none d-sm-table-cell">Kích thước</th>
                                     <th>Loại</th>
-                                    <th>Ngày tải lên</th>
-                                    <th>Người tải</th>
-                                    <th>Lượt tải</th>
+                                    <th class="d-none d-md-table-cell">Ngày tải lên</th>
+                                    <th class="d-none d-lg-table-cell">Người tải</th>
+                                    <th class="d-none d-xl-table-cell">Lượt tải</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($files as $file): ?>
                                     <tr>
-                                        <td>
-                                            <i class="fas <?php echo Helper::getFileIcon($file['file_extension']); ?> me-2"></i>
-                                            <strong><?php echo htmlspecialchars($file['file_name']); ?></strong>
+                                        <td style="max-width: 200px;">
+                                            <i class="fas <?php echo Helper::getFileIcon($file['file_extension']); ?> me-1"></i>
+                                            <strong title="<?php echo htmlspecialchars($file['file_name']); ?>" class="d-inline-block text-truncate" style="max-width: 180px; vertical-align: middle;"><?php echo htmlspecialchars($file['file_name']); ?></strong>
                                         </td>
-                                        <td>
-                                            <span class="text-muted" style="font-size: 11px;"><?php echo htmlspecialchars($file['description'] ?? '-'); ?></span>
+                                        <td class="d-none d-md-table-cell" style="max-width: 150px;">
+                                            <span class="text-muted d-inline-block text-truncate" style="font-size: 11px; max-width: 150px;" title="<?php echo htmlspecialchars($file['description'] ?? ''); ?>"><?php echo htmlspecialchars($file['description'] ?? '-'); ?></span>
                                         </td>
-                                        <td><?php echo Helper::formatFileSize($file['file_size']); ?></td>
+                                        <td class="d-none d-sm-table-cell"><?php echo Helper::formatFileSize($file['file_size']); ?></td>
                                         <td><span class="badge bg-secondary"><?php echo strtoupper($file['file_extension']); ?></span></td>
-                                        <td><?php echo Helper::formatDate($file['uploaded_at']); ?></td>
-                                        <td><?php echo htmlspecialchars($file['uploader_name'] ?? $file['uploader_username'] ?? '-'); ?></td>
-                                        <td><?php echo number_format($file['download_count']); ?></td>
+                                        <td class="d-none d-md-table-cell"><?php echo Helper::formatDate($file['uploaded_at']); ?></td>
+                                        <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($file['uploader_name'] ?? $file['uploader_username'] ?? '-'); ?></td>
+                                        <td class="d-none d-xl-table-cell text-center"><?php echo number_format($file['download_count']); ?></td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <?php 
@@ -228,13 +228,6 @@ include APP_ROOT . '/views/includes/header.php';
                                                             onclick='editDescription(<?php echo $file["id"]; ?>, <?php echo json_encode($file["description"] ?? ""); ?>)' 
                                                             title="Sửa mô tả">
                                                         <i class="fas fa-edit"></i>
-                                                    </button>
-                                                <?php endif; ?>
-                                                
-                                                <?php if ($permission->can('file.share')): ?>
-                                                    <button type="button" class="btn btn-outline-info" 
-                                                            onclick="shareFile(<?php echo $file['id']; ?>)" title="Chia sẻ">
-                                                        <i class="fas fa-share"></i>
                                                     </button>
                                                 <?php endif; ?>
                                                 
@@ -345,22 +338,22 @@ include APP_ROOT . '/views/includes/header.php';
 
 <!-- View File Modal -->
 <div class="modal fade" id="viewFileModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl" style="max-width: calc(100vw - 2rem); margin: 1rem;">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-eye me-2"></i><span id="viewFileName"></span></h5>
+                <h5 class="modal-title text-truncate" style="max-width: calc(100% - 50px);"><i class="fas fa-eye me-2"></i><span id="viewFileName"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-0">
-                <div id="fileViewerContainer" style="height: 75vh; width: 100%;">
+            <div class="modal-body p-0" style="overflow: hidden;">
+                <div id="fileViewerContainer" style="height: 75vh; width: 100%; max-width: 100%;">
                     <iframe id="fileViewerFrame" style="width: 100%; height: 100%; border: none;"></iframe>
                 </div>
             </div>
             <div class="modal-footer">
-                <a href="#" id="viewFileOpenNew" target="_blank" class="btn btn-outline-primary">
+                <a href="#" id="viewFileOpenNew" target="_blank" class="btn btn-outline-primary btn-sm">
                     <i class="fas fa-external-link-alt me-2"></i>Mở tab mới
                 </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
@@ -452,10 +445,6 @@ $("#renameFolderForm").on("submit", function(e) {
         }
     });
 });
-
-function shareFile(fileId) {
-    alert("Tính năng chia sẻ file đang được phát triển");
-}
 
 function editDescription(fileId, currentDescription) {
     $("#editFileId").val(fileId);
