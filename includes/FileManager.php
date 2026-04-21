@@ -274,21 +274,24 @@ class FileManager {
      */
     public function searchFiles($keyword, $limit = 100) {
         try {
+            // Sử dụng LIKE search để tránh yêu cầu FULLTEXT index
             $this->db->query("
                 SELECT f.*, u.username as uploader_username, u.full_name as uploader_name,
                        fo.folder_name
                 FROM files f
                 LEFT JOIN users u ON f.uploaded_by = u.id
                 LEFT JOIN folders fo ON f.folder_id = fo.id
-                WHERE MATCH(f.file_name, f.original_name, f.description) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
-                   OR f.file_name LIKE :like_keyword
-                   OR f.original_name LIKE :like_keyword
+                WHERE f.file_name LIKE :keyword1
+                   OR f.original_name LIKE :keyword2
+                   OR f.description LIKE :keyword3
                 ORDER BY f.uploaded_at DESC
                 LIMIT :limit
             ");
             
-            $this->db->bind(':keyword', $keyword);
-            $this->db->bind(':like_keyword', '%' . $keyword . '%');
+            $likeKeyword = '%' . $keyword . '%';
+            $this->db->bind(':keyword1', $likeKeyword);
+            $this->db->bind(':keyword2', $likeKeyword);
+            $this->db->bind(':keyword3', $likeKeyword);
             $this->db->bind(':limit', (int)$limit, PDO::PARAM_INT);
             
             return $this->db->fetchAll();

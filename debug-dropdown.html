@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Dropdown Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; }
+        .debug-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000;
+            color: #0f0;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 9999;
+        }
+        .debug-panel .log-entry {
+            margin: 2px 0;
+        }
+        .debug-panel .error { color: #f00; }
+        .debug-panel .success { color: #0f0; }
+        .debug-panel .info { color: #0ff; }
+    </style>
+</head>
+<body>
+    <!-- Copy exact navbar from your site -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fab fa-google-drive me-2"></i>Google Drive Manager
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-file"></i> Files
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-folder"></i> Folders
+                        </a>
+                    </li>
+                    
+                    <!-- Admin Dropdown - EXACT COPY -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog"></i> Admin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="#">Quản lý người dùng</a></li>
+                            <li><a class="dropdown-item" href="#">Quản lý vai trò</a></li>
+                            <li><a class="dropdown-item" href="#">Phân quyền</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="fab fa-google-drive text-primary"></i> Google Drive Account</a></li>
+                            <li><a class="dropdown-item" href="#">Lịch sử hoạt động</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <!-- Search Form -->
+                <form class="d-flex me-3">
+                    <input class="form-control me-2" type="search" placeholder="Tìm kiếm file...">
+                    <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                
+                <!-- User Menu -->
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> Admin User
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#">Thông tin cá nhân</a></li>
+                            <li><a class="dropdown-item" href="#">Đổi mật khẩu</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#">Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>🔍 Debug Dropdown Menu</h1>
+        
+        <div class="alert alert-info">
+            <h4>Hướng dẫn kiểm tra:</h4>
+            <ol>
+                <li>Nhấn vào <strong>"Admin"</strong> menu ở navbar phía trên</li>
+                <li>Xem console debug ở phía dưới màn hình</li>
+                <li>Nếu dropdown hoạt động → Vấn đề là browser cache trên site thật</li>
+                <li>Nếu dropdown KHÔNG hoạt động → Có lỗi khác (xem console log)</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5>Checklist Debug</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="check1" checked disabled>
+                    <label class="form-check-label" for="check1">
+                        ✅ Bootstrap 5.3.0 CSS loaded
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="check2" checked disabled>
+                    <label class="form-check-label" for="check2">
+                        ✅ Bootstrap 5.3.0 JS loaded
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="check3" checked disabled>
+                    <label class="form-check-label" for="check3">
+                        ✅ Font Awesome loaded
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="check4">
+                    <label class="form-check-label" for="check4">
+                        <span id="dropdownStatus">⏳ Đang chờ test dropdown...</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-warning">
+                <h5>⚠️ Nếu dropdown KHÔNG hoạt động trên site thật</h5>
+            </div>
+            <div class="card-body">
+                <h6>Thử các bước sau:</h6>
+                <ol>
+                    <li><strong>Hard Refresh:</strong> Nhấn <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> (hoặc <kbd>Ctrl</kbd> + <kbd>F5</kbd>)</li>
+                    <li><strong>Clear Cache:</strong> Xóa cache browser (Ctrl + Shift + Delete)</li>
+                    <li><strong>Kiểm tra file:</strong> Đảm bảo file navbar.php đã được upload lên server</li>
+                    <li><strong>Kiểm tra Console:</strong> Mở DevTools (F12) → Tab Console → Xem có lỗi gì không</li>
+                    <li><strong>Kiểm tra Network:</strong> DevTools → Tab Network → Reload → Xem bootstrap.bundle.min.js có load không</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-panel" id="debugPanel">
+        <div class="log-entry success">🚀 Debug Console Started</div>
+        <div class="log-entry info">📋 Waiting for dropdown events...</div>
+    </div>
+
+    <!-- Load Bootstrap BEFORE any custom scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const debugPanel = document.getElementById('debugPanel');
+        const dropdownStatus = document.getElementById('dropdownStatus');
+        const check4 = document.getElementById('check4');
+        
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry ' + type;
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            debugPanel.appendChild(entry);
+            debugPanel.scrollTop = debugPanel.scrollHeight;
+        }
+
+        // Test Bootstrap loaded
+        if (typeof bootstrap !== 'undefined') {
+            log('✅ Bootstrap JavaScript loaded successfully', 'success');
+            log('Bootstrap version: ' + bootstrap.Tooltip.VERSION, 'info');
+        } else {
+            log('❌ Bootstrap JavaScript NOT loaded!', 'error');
+        }
+
+        // Listen to dropdown events
+        const adminDropdown = document.getElementById('adminDropdown');
+        const userDropdown = document.getElementById('userDropdown');
+
+        if (adminDropdown) {
+            // Show event
+            adminDropdown.addEventListener('show.bs.dropdown', function () {
+                log('✅ Admin dropdown is OPENING', 'success');
+                dropdownStatus.textContent = '✅ Dropdown hoạt động!';
+                dropdownStatus.className = 'text-success';
+                check4.checked = true;
+            });
+
+            // Shown event
+            adminDropdown.addEventListener('shown.bs.dropdown', function () {
+                log('✅ Admin dropdown OPENED', 'success');
+            });
+
+            // Hide event
+            adminDropdown.addEventListener('hide.bs.dropdown', function () {
+                log('ℹ️ Admin dropdown is CLOSING', 'info');
+            });
+
+            // Hidden event
+            adminDropdown.addEventListener('hidden.bs.dropdown', function () {
+                log('ℹ️ Admin dropdown CLOSED', 'info');
+            });
+
+            // Click event
+            adminDropdown.addEventListener('click', function(e) {
+                log('🖱️ Admin dropdown CLICKED', 'info');
+                log('aria-expanded: ' + this.getAttribute('aria-expanded'), 'info');
+                log('data-bs-toggle: ' + this.getAttribute('data-bs-toggle'), 'info');
+            });
+        } else {
+            log('❌ Admin dropdown element NOT found!', 'error');
+        }
+
+        if (userDropdown) {
+            userDropdown.addEventListener('show.bs.dropdown', function () {
+                log('✅ User dropdown is OPENING', 'success');
+            });
+        }
+
+        // Check for JavaScript errors
+        window.addEventListener('error', function(e) {
+            log('❌ JavaScript Error: ' + e.message, 'error');
+            log('   File: ' + e.filename + ':' + e.lineno, 'error');
+        });
+
+        // Manual test button
+        log('💡 Click "Admin" menu để test dropdown', 'info');
+        
+        // Test dropdown programmatically after 2 seconds
+        setTimeout(function() {
+            log('🧪 Testing dropdown programmatically...', 'info');
+            if (typeof bootstrap !== 'undefined' && adminDropdown) {
+                try {
+                    const dropdown = new bootstrap.Dropdown(adminDropdown);
+                    log('✅ Bootstrap Dropdown instance created successfully', 'success');
+                } catch(e) {
+                    log('❌ Error creating Dropdown: ' + e.message, 'error');
+                }
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

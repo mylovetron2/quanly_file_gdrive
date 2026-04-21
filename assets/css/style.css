@@ -812,3 +812,63 @@ iframe {
         justify-content: center;
     }
 }
+
+/* ============================================
+   NAVBAR DROPDOWN FIX
+   ============================================ */
+/* Ensure navbar allows overflow for dropdowns */
+.navbar {
+    position: relative !important;
+    overflow: visible !important;
+}
+
+.navbar .navbar-collapse {
+    overflow: visible !important;
+}
+
+.navbar .nav-item.dropdown {
+    position: relative;
+}
+
+/* Navbar dropdown menu z-index must be higher than sidebar and other elements */
+.navbar .dropdown-menu {
+    position: absolute !important;
+    z-index: 1050 !important; /* Higher than sidebar (1000) and sticky columns */
+    margin-top: 0.125rem;
+}
+
+/* Ensure dropdown toggle is clickable */
+.navbar .dropdown-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Fix for dropdown menu positioning */
+.navbar .dropdown-menu[data-bs-popper] {
+    top: 100%;
+    left: 0;
+    margin-top: var(--bs-dropdown-spacer);
+}
+
+.navbar .dropdown-menu-end[data-bs-popper] {
+    right: 0;
+    left: auto;
+}
+
+/* Ensure dropdown menu is visible when shown */
+.navbar .dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Add smooth transition for dropdown */
+.navbar .dropdown-menu {
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+/* Prevent any parent overflow from clipping dropdown */
+.navbar-nav,
+.navbar .container-fluid {
+    overflow: visible !important;
+}

@@ -34,10 +34,10 @@
                 
                 <?php if ($auth->isAdmin()): ?>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-cog"></i> Admin
                     </a>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                         <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/admin/users.php">Quản lý người dùng</a></li>
                         <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/admin/roles.php">Quản lý vai trò</a></li>
                         <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/admin/permissions.php">Phân quyền</a></li>
@@ -58,10 +58,10 @@
             <!-- User Menu -->
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user-circle"></i> <?php echo $_SESSION['full_name'] ?? $_SESSION['username']; ?>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/auth/profile.php">Thông tin cá nhân</a></li>
                         <li><a class="dropdown-item" href="<?php echo APP_URL; ?>/views/auth/change-password.php">Đổi mật khẩu</a></li>
                         <li><hr class="dropdown-divider"></li>
